@@ -6,7 +6,7 @@ import User from "../models/User.js";
 const router = express.Router();
 
 const signToken = (user) => {
-    jwt.sign(
+    return jwt.sign(
         { id: user._id, username: user.username, email: user.email },
         process.env.JWT_SECRET,
         { expiresIn: '7d' }
