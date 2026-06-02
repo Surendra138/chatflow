@@ -1,4 +1,4 @@
-const required = ['MONGO_URI', 'JWT_SECRET', 'PORT'];
+const required = ['MONGO_URI', 'JWT_SECRET', 'PORT', 'CLIENT_URL'];
 
 required.forEach((key) => {
     if(!process.env[key]) {
