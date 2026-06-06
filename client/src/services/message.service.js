@@ -3,7 +3,9 @@ import axios from "axios";
 const API = import.meta.env.VITE_API_URL;
 
 const getAuthHeader = () => ({
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    headers: {
+        authorization: `Bearer ${localStorage.getItem('token')}`
+    }
 });
 
 export const getMessages = async (roomId) => {

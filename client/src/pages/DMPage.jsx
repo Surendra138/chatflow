@@ -18,7 +18,7 @@ const DMPage = () => {
     const [contact, setContact] = useState(null);
 
     // deterministic DM room key — must match server side
-    const dmKey = [user?._id, userId].sort().join('_');
+    const dmKey = [user?.id, userId].sort().join('_');
 
     const { messages, loading } = useMessages(userId, 'dm');
     const { typingUsers, handleTyping } = useTyping(dmKey);
@@ -26,10 +26,10 @@ const DMPage = () => {
     useEffect(() => {
         if (!socket || !dmKey) return;
         // join the deterministic private room so receive_dm fires on this client
-        socket.emit('join_room', dmKey);
+        socket.emit('join_room', { roomId: dmKey });
 
         return () => {
-            socket.emit('leave_room', dmKey);
+            socket.emit('leave_room', { roomId: dmKey });
         };
     }, [socket, dmKey]);
 
@@ -64,7 +64,7 @@ const DMPage = () => {
                 messages={messages}
                 typingUsers={typingUsers}
                 loading={loading}
-                currentUserId={user?._id}
+                currentUserId={user?.id}
             />
             <MessageInput onSend={handleSend} onTyping={handleTyping} />
         </>

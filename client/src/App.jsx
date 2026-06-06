@@ -1,19 +1,18 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
+
 import ProtectedRoute from './components/shared/ProtectedRoute';
+import PublicRoute from './components/shared/PublicRoute';
+
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import NotFoundPage from './pages/NotFoundPage';
+
 import ChatLayout from './components/layout/ChatLayout';
+import HomeRedirect from './components/layout/HomeRedirect';
 import RoomPage from './pages/RoomPage';
 import DMPage from './pages/DMPage';
-
-const NotFoundPage = () => (
-  <div style={{ padding: '40px', textAlign: 'center', color: '#a0a8b8' }}>
-    <h2>404 — Page not found</h2>
-    <a href="/" style={{ color: '#7c6af7' }}>Back to chat</a>
-  </div>
-);
 
 function App() {
   return (
@@ -21,21 +20,24 @@ function App() {
       <AuthProvider>
         <SocketProvider>
           <Routes>
-            {/* Protected routes — ChatLayout is the persistent shell */}
+
+            {/* Public routes — redirect away if already logged in */}
+            <Route element={<PublicRoute />}>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+            </Route>
+
+            {/* Protected routes — redirect to /login if not authenticated */}
             <Route element={<ProtectedRoute />}>
               <Route element={<ChatLayout />}>
-                <Route path="/"               element={<Navigate to="/login" replace />} />
-                <Route path="/room/:roomId"   element={<RoomPage />} />
-                <Route path="/dm/:userId"     element={<DMPage />} />
+                <Route path="/" element={<HomeRedirect />} />
+                <Route path="/room/:roomId" element={<RoomPage />} />
+                <Route path="/dm/:userId" element={<DMPage />} />
               </Route>
             </Route>
 
-            {/* Public routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="*" element={<NotFoundPage />} />
 
-            {/* Catch all */}
-            <Route path="*" element={<div>404 - Page Not Found</div>} />
           </Routes>
         </SocketProvider>
       </AuthProvider>

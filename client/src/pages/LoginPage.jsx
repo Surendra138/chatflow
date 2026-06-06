@@ -1,60 +1,86 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-const LoginPage = () => {
+export default function LoginPage() {
     const { login } = useAuth();
-    const [ email, setEmail ] = useState('');
-    const [ password, setPassword ] = useState('');
+    const [formData, setFormData] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e) => {
+    function handleChange(e) {
+        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    }
+
+    async function handleSubmit(e) {
         e.preventDefault();
         setError('');
         setLoading(true);
-
         try {
-            await login({ email, password });
+            await login(formData);
         } catch (err) {
-            setError(err.response?.data?.message || 'Login failed. Please try again!');
+            setError(err.response?.data?.message || 'Login failed. Please try again.');
         } finally {
             setLoading(false);
         }
-    };
+    }
 
     return (
-        <div className="auth-container">
+        <div className="auth-page">
+            <div className="auth-card">
 
-            <h2>Welcome back</h2>
+                <div className="auth-logo">
+                    <span className="auth-logo-icon">💬</span>
+                    <h1 className="auth-logo-title">ChatFlow</h1>
+                </div>
 
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
+                <h2 className="auth-heading">Welcome back</h2>
+                <p className="auth-subheading">Sign in to your account</p>
 
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
+                {error && <div className="auth-error">{error}</div>}
 
-                {error && <p className="error">{error}</p>}
+                <form className="auth-form" onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="email">Email</label>
+                        <input
+                            className="form-input"
+                            id="email"
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            placeholder="you@example.com"
+                            required
+                            autoComplete="email"
+                        />
+                    </div>
 
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Signing in...' : 'Sign in'}
-                </button>
-            </form>
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="password">Password</label>
+                        <input
+                            className="form-input"
+                            id="password"
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder="••••••••"
+                            required
+                            autoComplete="current-password"
+                        />
+                    </div>
 
-            <p>Don't have an account? <Link to="/register">Register</Link></p>
+                    <button className="auth-btn" type="submit" disabled={loading}>
+                        {loading ? 'Signing in...' : 'Sign in'}
+                    </button>
+                </form>
+
+                <p className="auth-switch">
+                    Don't have an account?{' '}
+                    <Link to="/register" className="auth-link">Create one</Link>
+                </p>
+
+            </div>
         </div>
     );
-};
-
-export default LoginPage;
+}

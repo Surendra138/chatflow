@@ -10,7 +10,7 @@ router.get('/:roomId', protect, async (req, res) => {
     const before = req.query.before;
 
     try {
-        const query = { room: req.params.roomId, type: 'Room' };
+        const query = { room: req.params.roomId, type: 'room' };
         if(before) query.createdAt = { $lt: new Date(before) };
 
         const messages = await Message.find(query)
@@ -33,8 +33,8 @@ router.get('/dm/:userId', protect, async (req, res) => {
         const query = {
             type: 'dm',
             $or: [
-                { sender: req.user.id, room: req.params.userId },
-                { sender: req.params.userId, room: req.user.id },
+                { sender: req.user.id, dmTo: req.params.userId },
+                { sender: req.params.userId, dmTo: req.user.id },
             ],
         };
 

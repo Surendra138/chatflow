@@ -17,14 +17,14 @@ export const useMessages = (id, type = 'room') => {
             setError(null);
 
             try {
-                const token = localStorage.getItem.token;
+                const token = localStorage.getItem('token');
                 const url = type === 'dm'
                     ? `${import.meta.env.VITE_API_URL}/messages/dm/${id}`
                     : `${import.meta.env.VITE_API_URL}/messages/${id}`;
 
                 const { data } = await axios.get(url, {
                     headers: {
-                        Authorization: `Bearer ${token}`
+                        authorization: `Bearer ${token}`
                     }
                 });
                 

@@ -1,85 +1,132 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { register } from "../services/auth.service";
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { register } from '../services/auth.service';
 
-const RegisterPage = () => {
+export default function RegisterPage() {
     const navigate = useNavigate();
-
-    const [ username, setUsername ] = useState('');
-    const [ email, setEmail ] = useState('');
-    const [ password, setPassword ] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-
+    const [formData, setFormData] = useState({
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+    });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e) => {
+    function handleChange(e) {
+        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    }
+
+    async function handleSubmit(e) {
         e.preventDefault();
         setError('');
 
-        if (password !== confirmPassword) {
-            return setError('Passwords do not match');
+        if (formData.password !== formData.confirmPassword) {
+            setError('Passwords do not match.');
+            return;
         }
 
         setLoading(true);
         try {
-            await register({ username, email, password });
+            await register({
+                username: formData.username,
+                email: formData.email,
+                password: formData.password
+            });
             navigate('/login');
         } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed. Please try again!');
+            setError(err.response?.data?.message || 'Registration failed. Please try again.');
         } finally {
             setLoading(false);
         }
-    };
+    }
 
     return (
-        <div className="auth-container">
+        <div className="auth-page">
+            <div className="auth-card">
 
-            <h2>Create an account</h2>
+                <div className="auth-logo">
+                    <span className="auth-logo-icon">💬</span>
+                    <h1 className="auth-logo-title">ChatFlow</h1>
+                </div>
 
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                />
+                <h2 className="auth-heading">Create an account</h2>
+                <p className="auth-subheading">Start chatting in seconds</p>
 
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
+                {error && <div className="auth-error">{error}</div>}
 
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
+                <form className="auth-form" onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="username">Username</label>
+                        <input
+                            className="form-input"
+                            id="username"
+                            type="text"
+                            name="username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            placeholder="yourname"
+                            required
+                            autoComplete="username"
+                        />
+                    </div>
 
-                <input
-                    type="password"
-                    placeholder="Confirm Password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                />
-                
-                {error && <p className="error">{error}</p>}
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="email">Email</label>
+                        <input
+                            className="form-input"
+                            id="email"
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            placeholder="you@example.com"
+                            required
+                            autoComplete="email"
+                        />
+                    </div>
 
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Signing up...' : 'Sign up'}
-                </button>
-            </form>
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="password">Password</label>
+                        <input
+                            className="form-input"
+                            id="password"
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder="••••••••"
+                            required
+                            autoComplete="new-password"
+                        />
+                    </div>
 
-            <p>Already have an account? <Link to="/login">Login</Link></p>
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="confirmPassword">Confirm Password</label>
+                        <input
+                            className="form-input"
+                            id="confirmPassword"
+                            type="password"
+                            name="confirmPassword"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            placeholder="••••••••"
+                            required
+                            autoComplete="new-password"
+                        />
+                    </div>
+
+                    <button className="auth-btn" type="submit" disabled={loading}>
+                        {loading ? 'Creating account...' : 'Create account'}
+                    </button>
+                </form>
+
+                <p className="auth-switch">
+                    Already have an account?{' '}
+                    <Link to="/login" className="auth-link">Sign in</Link>
+                </p>
+
+            </div>
         </div>
     );
-};
-
-export default RegisterPage;
+}
