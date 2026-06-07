@@ -12,7 +12,14 @@ export const registerMessageHandlers = (io, socket) => {
 
         const populated = await Message.findById(message._id).populate('sender', 'username');
 
+        // Emit to users in the room (for message feed)
         io.to(roomId).emit('receive_message', populated);
+
+        // Emit to ALL connected sockets (for unread badges in sidebar)
+        io.emit('message_notification', {
+            roomId,
+            senderId: socket.user.id
+        });
     };
 
     // DM message
@@ -29,7 +36,14 @@ export const registerMessageHandlers = (io, socket) => {
         // Deterministic private room key
         const dmRoom = [socket.user.id, toUserId].sort().join('_');
 
+        // Emit to users in the DM room (for message feed)
         io.to(dmRoom).emit('receive_dm', populated);
+
+        // Emit to ALL connected sockets (for unread badges in sidebar)
+        io.emit('dm_notification', {
+            senderId: socket.user.id,
+            toUserId
+        });
     };
 
     socket.on('send_message', sendMessage);

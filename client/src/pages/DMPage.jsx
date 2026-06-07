@@ -16,18 +16,16 @@ const DMPage = () => {
     const socket = useSocket();
     const { isOnline } = usePresence();
     const [contact, setContact] = useState(null);
+    const [contactError, setContactError] = useState('');
 
-    // deterministic DM room key — must match server side
     const dmKey = [user?.id, userId].sort().join('_');
 
-    const { messages, loading } = useMessages(userId, 'dm');
+    const { messages, loading, error: messagesError } = useMessages(userId, 'dm');
     const { typingUsers, handleTyping } = useTyping(dmKey);
 
     useEffect(() => {
         if (!socket || !dmKey) return;
-        // join the deterministic private room so receive_dm fires on this client
         socket.emit('join_room', { roomId: dmKey });
-
         return () => {
             socket.emit('leave_room', { roomId: dmKey });
         };
@@ -35,11 +33,13 @@ const DMPage = () => {
 
     useEffect(() => {
         if (!userId) return;
+        setContactError('');
         const fetchContact = async () => {
             try {
                 const data = await getUserById(userId);
                 setContact(data);
             } catch (err) {
+                setContactError('Failed to load contact');
                 console.error('Failed to fetch contact:', err);
             }
         };
@@ -60,6 +60,9 @@ const DMPage = () => {
                 name={contact?.username || '...'}
                 isOnline={isOnline(userId)}
             />
+            {(contactError || messagesError) && (
+                <p className="chat-error">{contactError || messagesError}</p>
+            )}
             <MessageFeed
                 messages={messages}
                 typingUsers={typingUsers}

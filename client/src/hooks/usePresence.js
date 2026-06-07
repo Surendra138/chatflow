@@ -8,6 +8,11 @@ export const usePresence = () => {
     useEffect(() => {
         if(!socket) return;
 
+        // Seed the full online list when we first connect
+        const handleOnlineUsers = ({ userIds }) => {
+            setOnlineUsers(new Set(userIds));
+        };
+
         const handleUserConnected = ({ userId }) => {
             setOnlineUsers((prev) => new Set([...prev, userId]));
             console.log('user connected:', userId);
@@ -22,10 +27,12 @@ export const usePresence = () => {
             console.log('user disconnected:', userId);
         };
 
+        socket.on('online_users', handleOnlineUsers);
         socket.on('user_connected', handleUserConnected);
         socket.on('user_disconnected', handleUserDisconnected);
 
         return () => {
+            socket.off('online_users', handleOnlineUsers);
             socket.off('user_connected', handleUserConnected);
             socket.off('user_disconnected', handleUserDisconnected);
         };

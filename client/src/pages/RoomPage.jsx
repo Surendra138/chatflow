@@ -13,12 +13,16 @@ const RoomPage = () => {
     const { roomId } = useParams();
     const { user } = useAuth();
     const socket = useSocket();
-    const { messages, loading } = useMessages(roomId, 'room');
+    const { messages, loading, error: messagesError } = useMessages(roomId, 'room');
     const { typingUsers, handleTyping } = useTyping(roomId);
     const [room, setRoom] = useState(null);
+    const [roomError, setRoomError] = useState('');
 
     useEffect(() => {
-        getRoomById(roomId).then(setRoom).catch(() => {});
+        setRoomError('');
+        getRoomById(roomId)
+            .then(setRoom)
+            .catch(() => setRoomError('Failed to load room details'));
     }, [roomId]);
 
     useEffect(() => {
@@ -40,6 +44,9 @@ const RoomPage = () => {
                 name={room ? `# ${room.name}` : '...'}
                 memberCount={room?.members?.length}
             />
+            {(roomError || messagesError) && (
+                <p className="chat-error">{roomError || messagesError}</p>
+            )}
             <MessageFeed
                 messages={messages}
                 typingUsers={typingUsers}
